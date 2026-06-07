@@ -1,0 +1,28 @@
+# configs/document_filters.yaml
+
+documents:
+
+  ai_engineering:
+    skip_pages:
+      - [1, 18]
+      - [495, 535]
+
+  llm_engineers_handbook:
+    skip_pages:
+      - [1, 12]
+      - [500, 522]
+
+  introducing_mlops:
+    skip_pages:
+      - [1, 12]
+      - [175, 185]
+
+  learning_devops:
+    skip_pages:
+      - [1, 18]
+      - [520, 559]
+
+  practical_statistics:
+    skip_pages:
+      - [1, 12]
+      - [540, 562]

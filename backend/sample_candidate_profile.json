@@ -1,0 +1,63 @@
+{
+    "candidate_summary": "AI/ML Engineer with hands-on experience building Retrieval-Augmented Generation (RAG) systems, computer vision applications, and LLM-powered products",
+    "skills": [
+      "Python",
+      "JavaScript",
+      "SQL",
+      "PyTorch",
+      "TensorFlow",
+      "Scikit-learn",
+      "LangChain",
+      "LangGraph",
+      "FastAPI",
+      "Docker",
+      "React",
+      "Next.js",
+      "Tailwind CSS",
+      "FAISS",
+      "ChromaDB",
+      "OpenCV",
+      "YOLOv8"
+    ],
+    "projects": [
+      {
+        "title": "AI-Powered Adaptive Interview System",
+        "description": "Built an intelligent interview platform featuring resume parsing, RAG retrieval, dynamic question generation, adaptive follow-ups, LangGraph orchestration, and recruiter/candidate reports"
+      },
+      {
+        "title": "Medical Research Assistant (RAG)",
+        "description": "Developed a medical research assistant with hybrid retrieval, semantic search, citations, and multi-document ingestion"
+      },
+      {
+        "title": "Number Plate Detection System",
+        "description": "Implemented real-time vehicle number plate detection and tracking using YOLOv8 and OpenCV"
+      },
+      {
+        "title": "Personal Finance Assistant",
+        "description": "Created an AI-powered finance assistant for transaction analysis, insights generation, and reporting"
+      }
+    ],
+    "domains": [
+      "Computer Vision",
+      "Natural Language Processing",
+      "Machine Learning"
+    ],
+    "claimed_competencies": [
+      "Retrieval-Augmented Generation (RAG) systems",
+      "Computer Vision",
+      "LLM-powered products",
+      "Prompt Engineering",
+      "Document Ingestion Pipelines",
+      "LLM Evaluation Workflows"
+    ],
+    "experience_level": "intermediate",
+    "education": [
+      "Bachelor of Technology (B.Tech) – Computer Science Engineering (AI & ML)"
+    ],
+    "strengths": [
+      "Building Retrieval-Augmented Generation (RAG) systems",
+      "Developing computer vision applications",
+      "Creating LLM-powered products",
+      "Working with modern AI deployment workflows"
+    ]
+  }
