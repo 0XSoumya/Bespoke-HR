@@ -1,4 +1,6 @@
 import json
+from urllib import response
+import re
 
 from app.models.schemas.followup_decision import (
     FollowupDecision,
@@ -68,8 +70,24 @@ class FollowupService:
             cleaned_response.strip()
         )
 
+        print("\nRAW FOLLOWUP RESPONSE:")
+        print(response)
+
+        print("\nCLEANED FOLLOWUP RESPONSE:")
+        print(cleaned_response)
+
+        json_match = re.search(
+            r"\{[\s\S]*\}",
+            cleaned_response,
+        )
+
+        if not json_match:
+            raise ValueError(
+                "No JSON found in LLM response"
+            )
+
         parsed_json = json.loads(
-            cleaned_response
+            json_match.group()
         )
 
         return (

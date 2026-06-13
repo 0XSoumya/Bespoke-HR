@@ -165,7 +165,7 @@ class SessionService:
         ]
 
     def mark_question_complete(
-        self,
+        self,   
         session: InterviewSession,
     ):
 

@@ -44,11 +44,34 @@ followup_service = (
 def process_answer_node(
     state: InterviewState,
 ):
-    state.status = (
-        "answer_processed"
-    )
+
+    if state.pending_followup:
+
+        state.status = (
+            "followup_answer_received"
+        )
+
+    else:
+
+        state.status = (
+            "answer_processed"
+        )
 
     return state
+
+def answer_router(
+    state: InterviewState,
+):
+
+    if state.pending_followup:
+
+        return (
+            "evaluate_question"
+        )
+
+    return (
+        "followup_decision"
+    )
 
 
 def followup_decision_node(
@@ -274,9 +297,16 @@ def build_interview_graph():
         "process_answer"
     )
 
-    graph.add_edge(
+    graph.add_conditional_edges(
         "process_answer",
-        "followup_decision",
+        answer_router,
+        {
+            "followup_decision":
+             "followup_decision",
+
+            "evaluate_question":
+             "evaluate_question",
+        },
     )
 
     graph.add_conditional_edges(
