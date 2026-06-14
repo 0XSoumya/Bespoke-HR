@@ -4,6 +4,38 @@ An AI-powered interview platform that conducts personalized technical interviews
 
 The system analyzes a candidate's resume, generates role-specific interview questions, dynamically adapts based on responses, and produces detailed recruiter and candidate reports.
 
+## Architecture
+
+```mermaid
+flowchart TD
+
+    A[Resume Upload] --> B[Resume Parser]
+    B --> C[Candidate Profile]
+
+    C --> D[Interview Planner]
+    D --> E[Query Planner]
+
+    E --> F[Retrieval Engine]
+    F --> G[FAISS Vector Store]
+    F --> H[Knowledge Base]
+
+    E --> I[Question Generator]
+
+    I --> J[LangGraph Interview Workflow]
+
+    J --> K[Question Presentation]
+    J --> L[Followup Generator]
+    J --> M[Evaluation Engine]
+
+    M --> N[Question Evaluation]
+    N --> O[Report Generator]
+
+    O --> P[Recruiter Report]
+    O --> Q[Candidate Report]
+
+    J --> R[(MongoDB)]
+```
+
 ---
 
 ## Overview
