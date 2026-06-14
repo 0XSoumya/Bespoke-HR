@@ -4,7 +4,42 @@ An AI-powered interview platform that conducts personalized technical interviews
 
 The system analyzes a candidate's resume, generates role-specific interview questions, dynamically adapts based on responses, and produces detailed recruiter and candidate reports.
 
-## Architecture
+---
+
+## Overview
+
+Traditional interviews often follow a static question set regardless of a candidate's background, experience, or performance.
+
+This project introduces an intelligent interview workflow that:
+
+* Parses and analyzes resumes
+* Builds structured candidate profiles
+* Retrieves domain knowledge from a curated knowledge base
+* Generates role-specific technical questions
+* Produces adaptive follow-up questions
+* Evaluates candidate responses
+* Generates recruiter and candidate reports
+
+The entire interview lifecycle is orchestrated using LangGraph.
+
+---
+
+## Why This Project?
+
+Recruiters and interviewers often struggle to create consistent, role-specific, and adaptive interviews at scale.
+
+This system addresses that challenge by combining:
+
+* Resume intelligence
+* Retrieval-Augmented Generation (RAG)
+* Agentic workflows with LangGraph
+* Automated evaluation and reporting
+
+The result is a scalable interview platform capable of conducting personalized technical interviews while maintaining consistency and evaluation quality.
+
+---
+
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -23,36 +58,45 @@ flowchart TD
 
     I --> J[LangGraph Interview Workflow]
 
-    J --> K[Question Presentation]
-    J --> L[Followup Generator]
-    J --> M[Evaluation Engine]
+    J --> K[Follow-up Generation]
+    J --> L[Evaluation Engine]
+    J --> M[State Management]
 
-    M --> N[Question Evaluation]
-    N --> O[Report Generator]
+    L --> N[Report Generator]
 
-    O --> P[Recruiter Report]
-    O --> Q[Candidate Report]
+    N --> O[Recruiter Report]
+    N --> P[Candidate Report]
 
-    J --> R[(MongoDB)]
+    J --> Q[(MongoDB)]
 ```
 
 ---
 
-## Overview
+## LangGraph Interview Workflow
 
-Traditional interviews often follow a static question set regardless of a candidate's background, experience, or performance.
+```mermaid
+flowchart TD
 
-This project introduces an intelligent interview workflow that:
+    A[Answer Submitted]
+    --> B[Process Answer]
 
-* Parses and analyzes resumes
-* Builds structured candidate profiles
-* Retrieves domain knowledge from a curated knowledge base
-* Generates role-specific technical questions
-* Produces adaptive follow-up questions
-* Evaluates candidate responses
-* Generates recruiter and candidate reports
+    B --> C{Need Follow-up?}
 
-The entire interview lifecycle is orchestrated using LangGraph.
+    C -->|Yes| D[Generate Follow-up]
+    D --> E[Present Follow-up]
+
+    C -->|No| F[Evaluate Question]
+
+    E --> F
+
+    F --> G[Advance Question]
+
+    G --> H{Interview Complete?}
+
+    H -->|No| I[Present Next Question]
+
+    H -->|Yes| J[Generate Report]
+```
 
 ---
 
@@ -90,7 +134,7 @@ The entire interview lifecycle is orchestrated using LangGraph.
 
 ### Report Generation
 
-Recruiter Report:
+**Recruiter Report**
 
 * Overall score
 * Topic-wise scores
@@ -98,47 +142,11 @@ Recruiter Report:
 * Weaknesses
 * Hiring recommendation
 
-Candidate Report:
+**Candidate Report**
 
 * Performance summary
 * Areas for improvement
 * Learning recommendations
-
----
-
-## System Architecture
-
-```text
-Resume Upload
-      │
-      ▼
-Resume Parser
-      │
-      ▼
-Candidate Profile
-      │
-      ▼
-Interview Planner
-      │
-      ▼
-Query Planner
-      │
-      ▼
-Retrieval Engine
-      │
-      ▼
-Question Generator
-      │
-      ▼
-LangGraph Interview Workflow
-      │
-      ├── Follow-up Generation
-      ├── Evaluation
-      └── State Management
-      │
-      ▼
-Report Generator
-```
 
 ---
 
@@ -154,13 +162,14 @@ Report Generator
 ### LLM Layer
 
 * Groq API
-* LLM-powered:
 
-  * Resume Parsing
-  * Question Generation
-  * Follow-up Generation
-  * Evaluation
-  * Reporting
+Used for:
+
+* Resume Parsing
+* Question Generation
+* Follow-up Generation
+* Evaluation
+* Report Generation
 
 ### Retrieval
 
@@ -188,8 +197,9 @@ backend/
 │   │   ├── retrieval/
 │   │   ├── resume/
 │   │   └── llm/
-│   ├── repositories/
-│   └── models/
+│   ├── database/
+│   ├── models/
+│   └── core/
 │
 ├── knowledge_base/
 ├── scripts/
@@ -203,56 +213,42 @@ frontend/
 
 ## Interview Workflow
 
-### Step 1
+### Step 1: Resume Upload
 
-Upload Resume
+The candidate uploads a resume which is parsed into a structured profile.
 
-Candidate resume is parsed and converted into a structured profile.
-
-### Step 2
-
-Create Interview
+### Step 2: Interview Creation
 
 The system:
 
-* Analyzes candidate strengths
+* Analyzes the candidate profile
 * Determines interview focus areas
 * Builds an interview plan
 
-### Step 3
+### Step 3: Knowledge Retrieval
 
-Retrieve Context
+Relevant topic-specific knowledge is retrieved from the vector database.
 
-Relevant knowledge is retrieved from the vector database for each interview topic.
+### Step 4: Question Generation
 
-### Step 4
+Role-specific technical questions are generated using retrieved context.
 
-Generate Questions
+### Step 5: Adaptive Follow-ups
 
-Role-specific technical questions are generated using retrieval context.
+Follow-up questions are generated dynamically based on candidate responses.
 
-### Step 5
+### Step 6: Evaluation
 
-Adaptive Follow-Ups
-
-Based on candidate responses, the system generates targeted follow-up questions.
-
-### Step 6
-
-Evaluate Responses
-
-Each question is evaluated across multiple dimensions:
+Each response is evaluated on:
 
 * Conceptual Accuracy
 * Completeness
 * Technical Depth
 * Communication
 
-### Step 7
+### Step 7: Report Generation
 
-Generate Reports
-
-Recruiter and candidate reports are produced automatically.
+Recruiter and candidate reports are generated automatically.
 
 ---
 
@@ -295,13 +291,35 @@ POST /interviews/{interview_id}/answer
 ### Get Current Question
 
 ```http
-GET /interviews/{interview_id}/question
+GET /interviews/{interview_id}/current-question
 ```
 
 ### Get Interview Report
 
 ```http
 GET /interviews/{interview_id}/report
+```
+
+---
+
+## Setup
+
+```bash
+git clone <repository-url>
+
+cd backend
+
+uv sync
+
+uv run uvicorn app.main:app --reload
+```
+
+Create a `.env` file and configure:
+
+```env
+GROQ_API_KEY=your_key
+MONGODB_URI=your_uri
+VOYAGE_API_KEY=your_key
 ```
 
 ---
@@ -329,4 +347,4 @@ The platform successfully supports:
 * Automated recruiter reports
 * Candidate feedback generation
 
-The system demonstrates how modern LLM orchestration, retrieval systems, and agent workflows can be combined to create intelligent interview experiences.
+This project demonstrates how modern LLM orchestration, retrieval systems, and agentic workflows can be combined to build intelligent and scalable interview systems.
