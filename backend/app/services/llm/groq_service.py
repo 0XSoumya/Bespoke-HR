@@ -13,6 +13,7 @@ class GroqService:
         self,
         prompt: str,
         model: str = "llama-3.3-70b-versatile",
+        
     ) -> str:
 
         response = self.client.chat.completions.create(
