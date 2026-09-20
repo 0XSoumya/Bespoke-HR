@@ -1,76 +1,60 @@
+from typing import Optional
 from pydantic import BaseModel
 
 from app.models.schemas.candidate_profile import (
     CandidateProfile,
 )
-
 from app.models.schemas.context_packet import (
     RetrievalContext,
 )
-
 from app.models.schemas.question_set import (
     QuestionSet,
 )
-
 from app.models.schemas.interview_session import (
     InterviewSession,
 )
-
 from app.models.schemas.interview_report import (
     InterviewReport,
 )
-
 from app.models.schemas.question_record import (
     QuestionRecord,
 )
-
 from app.models.schemas.followup_decision import (
     FollowupDecision,
 )
+from app.models.schemas.interview_profile import (
+    InterviewProfile,
+)
 
 
-class InterviewState(
-    BaseModel
-):
+class InterviewState(BaseModel):
     candidate_id: str
 
     role: str
 
-    candidate_profile: (
-        CandidateProfile
-    )
+    company: str = "Target Company"
 
-    retrieval_context: (
-        RetrievalContext | None
-    ) = None
+    interview_profile: Optional[InterviewProfile] = None
 
-    question_set: (
-        QuestionSet | None
-    ) = None
+    candidate_profile: CandidateProfile
 
-    session: (
-        InterviewSession | None
-    ) = None
+    retrieval_context: RetrievalContext | None = None
 
-    current_question: (
-        QuestionRecord | None
-    ) = None
+    question_set: QuestionSet | None = None
+
+    session: InterviewSession | None = None
+
+    current_question: QuestionRecord | None = None
 
     current_answer: str | None = None
 
-    followup_decision: (
-        FollowupDecision | None
-    ) = None
+    followup_decision: FollowupDecision | None = None
 
     pending_followup: bool = False
 
-    report: (
-        InterviewReport | None
-    ) = None
+    report: InterviewReport | None = None
 
-    status: str = (
-        "initialized"
-    )
+    status: str = "initialized"
 
     number_of_questions: int = 3
     interviewer_id: str | None = None

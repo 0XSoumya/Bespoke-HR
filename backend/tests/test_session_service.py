@@ -1,90 +1,39 @@
-from app.models.schemas.question_set import (
-    QuestionSet,
-)
-
-from app.models.schemas.interview_question import (
-    InterviewQuestion,
-)
-
-from app.services.interview.session_service import (
-    SessionService,
-)
+from app.models.schemas.question_set import QuestionSet
+from app.models.schemas.interview_question import InterviewQuestion
+from app.services.interview.session_service import SessionService
 
 
-question_set = QuestionSet(
-    role="GenAI Engineer",
-    questions=[
-        InterviewQuestion(
-            question_id="q1",
-            topic="RAG",
-            difficulty="intermediate",
-            question=(
-                "Explain the key "
-                "components of a "
-                "RAG pipeline."
+def test_session_service_lifecycle():
+    question_set = QuestionSet(
+        role="GenAI Engineer",
+        questions=[
+            InterviewQuestion(
+                question_id="q1",
+                topic="RAG",
+                difficulty="intermediate",
+                question="Explain the key components of a RAG pipeline.",
             ),
-        ),
-        InterviewQuestion(
-            question_id="q2",
-            topic="Embeddings",
-            difficulty="intermediate",
-            question=(
-                "What are embeddings?"
+            InterviewQuestion(
+                question_id="q2",
+                topic="Embeddings",
+                difficulty="intermediate",
+                question="What are embeddings?",
             ),
-        ),
-    ],
-)
-
-service = SessionService()
-
-session = (
-    service.create_session(
-        question_set
+        ],
     )
-)
 
-print(
-    "INTERVIEW ID:",
-    session.interview_id
-)
+    service = SessionService()
+    session = service.create_session(question_set)
 
-current = (
-    service.get_current_question(
-        session
-    )
-)
+    assert session.interview_id is not None
+    assert len(session.question_records) == 2
 
-print(
-    "\nCURRENT QUESTION:\n"
-)
+    current = service.get_current_question(session)
+    assert current.main_question == "Explain the key components of a RAG pipeline."
 
-print(
-    current.main_question
-)
+    service.save_main_answer(session, "A RAG pipeline retrieves relevant documents and feeds them to an LLM.")
+    service.mark_question_complete(session)
+    service.move_to_next_question(session)
 
-service.save_main_answer(
-    session,
-    "Sample Answer",
-)
-
-service.mark_question_complete(
-    session
-)
-
-service.move_to_next_question(
-    session
-)
-
-current = (
-    service.get_current_question(
-        session
-    )
-)
-
-print(
-    "\nNEXT QUESTION:\n"
-)
-
-print(
-    current.main_question
-)
+    next_q = service.get_current_question(session)
+    assert next_q.main_question == "What are embeddings?"

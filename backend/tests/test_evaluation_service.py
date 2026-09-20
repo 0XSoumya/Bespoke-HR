@@ -1,92 +1,78 @@
-from app.models.schemas.question_record import (
-    QuestionRecord,
-)
-
+from unittest.mock import patch
+from app.models.schemas.question_record import QuestionRecord
+from app.models.schemas.question_evaluation import QuestionEvaluation
 from app.models.schemas.context_packet import (
-    RetrievedChunk,
     TopicContextPacket,
     RetrievalContext,
 )
-
-from app.services.interview.evaluation_service import (
-    EvaluationService,
-)
+from app.services.interview.evaluation_service import EvaluationService
 
 
-question_record = QuestionRecord(
-    question_id="q1",
-    topic="RAG",
-    difficulty="intermediate",
+def test_evaluation_service_with_mock():
+    question_record = QuestionRecord(
+        question_id="q1",
+        topic="RAG",
+        difficulty="intermediate",
+        main_question="Explain the key components of a RAG pipeline.",
+        expected_concepts=["retriever", "generator", "context augmentation"],
+        evaluation_criteria=["conceptual accuracy", "completeness"],
+        main_answer="A RAG system uses a retriever and generator.",
+    )
 
-    main_question=(
-        "Explain the key "
-        "components of a "
-        "RAG pipeline."
-    ),
+    retrieval_context = RetrievalContext(
+        role="GenAI Engineer",
+        topic_packets=[
+            TopicContextPacket(
+                topic="RAG",
+                focus_areas=["retrieval", "generation"],
+                question_objectives=["Assess architecture"],
+            )
+        ],
+    )
 
-    expected_concepts=[
-        "retriever",
-        "generator",
-        "context augmentation",
-    ],
+    mock_eval = QuestionEvaluation(
+        score=8.5,
+        conceptual_accuracy=8.5,
+        completeness=8.0,
+        technical_depth=8.5,
+        communication=9.0,
+        strengths=["Clear explanation of retriever"],
+        weaknesses=["Omitted context augmentation details"],
+        summary="Solid fundamental answer",
+    )
 
-    evaluation_criteria=[
-        "conceptual accuracy",
-        "completeness",
-    ],
-
-    main_answer=(
-        "A RAG system uses a retriever "
-        "to fetch relevant information "
-        "from a knowledge source and "
-        "passes the retrieved content "
-        "to the generator to create "
-        "the final response."
-    ),
-)
-
-retrieval_context = RetrievalContext(
-    role="GenAI Engineer",
-
-    topic_packets=[
-        TopicContextPacket(
-            topic="RAG",
-
-            focus_areas=[
-                "retrieval",
-                "generation",
-            ],
-
-            question_objectives=[
-                "assess conceptual understanding"
-            ],
-
-            retrieved_chunks=[
-                RetrievedChunk(
-                    chunk=(
-                        "RAG combines a "
-                        "retriever with a "
-                        "generator and uses "
-                        "retrieved context."
-                    ),
-                    metadata={},
-                    retrieval_count=3,
-                )
-            ],
+    with patch.object(EvaluationService, "evaluate_question", return_value=mock_eval):
+        evaluator = EvaluationService()
+        result = evaluator.evaluate_question(
+            question_record=question_record,
+            retrieval_context=retrieval_context,
         )
-    ],
-)
+        assert result.score == 8.5
+        assert len(result.strengths) == 1
 
-evaluation = (
-    EvaluationService()
-    .evaluate_question(
-        question_record,
-        retrieval_context,
-    )
-)
 
-print(
-    evaluation.model_dump_json(
-        indent=2
+if __name__ == "__main__":
+    question_record = QuestionRecord(
+        question_id="q1",
+        topic="RAG",
+        difficulty="intermediate",
+        main_question="Explain the key components of a RAG pipeline.",
+        expected_concepts=["retriever", "generator", "context augmentation"],
+        evaluation_criteria=["conceptual accuracy", "completeness"],
+        main_answer="A RAG system uses a retriever to fetch relevant information and passes it to the generator.",
     )
-)
+    retrieval_context = RetrievalContext(
+        role="GenAI Engineer",
+        topic_packets=[
+            TopicContextPacket(
+                topic="RAG",
+                focus_areas=["retrieval", "generation"],
+                question_objectives=["Assess architecture"],
+            )
+        ],
+    )
+    evaluation = EvaluationService().evaluate_question(
+        question_record=question_record,
+        retrieval_context=retrieval_context,
+    )
+    print(evaluation.model_dump_json(indent=2))

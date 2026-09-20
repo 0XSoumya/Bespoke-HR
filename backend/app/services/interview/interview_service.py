@@ -44,7 +44,13 @@ class InterviewService:
         candidate_id: str,
         role: str,
         candidate_profile,
+        company: str = "Target Company",
+        interview_stage: str = "Technical Round 1",
+        interview_nature: str = "ML/AI Technical",
         number_of_questions: int = 3,
+        number_of_followups: int = 1,
+        job_description: str | None = None,
+        interview_profile=None,
         interviewer_id: str | None = None,
         candidate_user_id: str | None = None,
         candidate_name: str | None = None,
@@ -55,14 +61,16 @@ class InterviewService:
         state = (
             self.engine
             .create_interview(
-                candidate_id=(
-                    candidate_id
-                ),
+                candidate_id=candidate_id,
                 role=role,
-                candidate_profile=(
-                    candidate_profile
-                ),
+                candidate_profile=candidate_profile,
+                company=company,
+                interview_stage=interview_stage,
+                interview_nature=interview_nature,
                 number_of_questions=number_of_questions,
+                number_of_followups=number_of_followups,
+                job_description=job_description,
+                interview_profile=interview_profile,
                 interviewer_id=interviewer_id,
                 candidate_user_id=candidate_user_id,
                 candidate_name=candidate_name,

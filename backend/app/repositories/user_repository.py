@@ -9,8 +9,9 @@ from app.core.database import db
 class UserRepository:
     COLLECTION_NAME = "users"
 
-    def __init__(self):
-        self.collection = db[self.COLLECTION_NAME]
+    @property
+    def collection(self):
+        return db[self.COLLECTION_NAME]
 
     async def ensure_indexes(self) -> None:
         """Create unique index on email."""

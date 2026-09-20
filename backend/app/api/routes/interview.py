@@ -9,7 +9,6 @@ from fastapi import (
 from app.api.deps import (
     get_current_user,
     get_optional_user,
-    require_interviewer,
 )
 from app.models.schemas.candidate_profile import (
     CandidateProfile,
@@ -26,6 +25,9 @@ from app.repositories.candidate_repository import (
 from app.services.interview.interview_service import (
     InterviewService,
 )
+from app.services.interview.interview_profile_service import (
+    InterviewProfileService,
+)
 
 router = APIRouter(
     prefix="/interviews",
@@ -34,6 +36,7 @@ router = APIRouter(
 
 interview_service = InterviewService()
 candidate_repository = CandidateRepository()
+profile_service = InterviewProfileService()
 
 
 def _check_interview_access(
@@ -43,37 +46,44 @@ def _check_interview_access(
 ):
     """
     Object-level authorization check:
-    - If user is a candidate: must match candidate_user_id or candidate_email or candidate_id.
-    - If user is an interviewer: must match interviewer_id (or unassigned/legacy).
+    - If interview is owned by a candidate, unauthenticated requests are denied.
+    - If user is a candidate: must match candidate_user_id, candidate_email, or candidate_id.
+    - If user is an interviewer: must match interviewer_id if assigned.
     """
+    cand_user_id = str(raw_interview.get("candidate_user_id") or "")
+    cand_email = (raw_interview.get("candidate_email") or "").lower().strip()
+    cand_id = str(raw_interview.get("candidate_id") or "")
+
     if not user:
-        # If unauthenticated, allow in development/demo mode
+        if cand_user_id or cand_email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required to access this interview session.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         return
 
-    role = user.get("role")
+    role = user.get("role", "candidate")
     user_id = str(user.get("_id"))
-    user_email = user.get("email", "").lower()
+    user_email = user.get("email", "").lower().strip()
 
     if role == "candidate":
-        cand_user_id = str(raw_interview.get("candidate_user_id") or "")
-        cand_email = (raw_interview.get("candidate_email") or "").lower()
-        cand_id = str(raw_interview.get("candidate_id") or "")
-
         if cand_user_id and cand_user_id == user_id:
             return
         if cand_email and cand_email == user_email:
             return
         if cand_id and cand_id == user_id:
             return
-        # If not matched, deny
+        # If interview is not assigned to any user, permit the logged-in candidate
+        if not cand_user_id and not cand_email:
+            return
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied: you are not authorized to view this interview.",
+            detail="Access denied: you are not authorized to access this interview session.",
         )
 
     if role == "interviewer":
         owner_id = raw_interview.get("interviewer_id")
-        # If interview is assigned to an interviewer and doesn't match
         if require_ownership_for_interviewer and owner_id and str(owner_id) != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -81,20 +91,16 @@ def _check_interview_access(
             )
 
 
-@router.post("/create")
-async def create_interview(
+@router.post("/profile-preview")
+async def preview_interview_profile(
     request: CreateInterviewRequest,
     current_user: Optional[dict[str, Any]] = Depends(get_optional_user),
 ):
-    # If user is authenticated as candidate, candidate cannot create interviews
-    if current_user and current_user.get("role") == "candidate":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Candidates are not permitted to create interviews.",
-        )
-
+    """
+    Generates and previews the tailored Interview Profile (company intelligence,
+    rubric criteria, and evidence sources) prior to starting the session.
+    """
     candidate = await candidate_repository.get_candidate(request.candidate_id)
-
     if candidate is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -104,16 +110,70 @@ async def create_interview(
     profile_data = candidate.get("candidate_profile") or candidate.get("profile")
     profile = CandidateProfile.model_validate(profile_data)
 
-    interviewer_id = str(current_user["_id"]) if current_user else None
-    cand_user_id = request.candidate_user_id or candidate.get("user_id")
-    cand_email = request.candidate_email or candidate.get("candidate_email")
-    cand_name = request.candidate_name or candidate.get("candidate_name")
+    interview_profile = profile_service.build_interview_profile(
+        candidate_profile=profile,
+        company=request.company,
+        target_role=request.role,
+        interview_stage=request.interview_stage,
+        interview_nature=request.interview_nature,
+        number_of_questions=request.number_of_questions,
+        number_of_followups=request.number_of_followups,
+        job_description=request.job_description,
+    )
+
+    return interview_profile.model_dump()
+
+
+@router.post("/create")
+async def create_interview(
+    request: CreateInterviewRequest,
+    current_user: Optional[dict[str, Any]] = Depends(get_optional_user),
+):
+    """
+    Creates a tailored preparation interview session centered on Candidate + Company + Stage + Nature.
+    """
+    candidate = await candidate_repository.get_candidate(request.candidate_id)
+    if candidate is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Candidate profile not found",
+        )
+
+    profile_data = candidate.get("candidate_profile") or candidate.get("profile")
+    profile = CandidateProfile.model_validate(profile_data)
+
+    # Candidate ownership binding
+    cand_user_id = (
+        str(current_user["_id"])
+        if current_user and current_user.get("role") == "candidate"
+        else (request.candidate_user_id or candidate.get("user_id"))
+    )
+    cand_email = (
+        current_user.get("email")
+        if current_user and current_user.get("role") == "candidate"
+        else (request.candidate_email or candidate.get("candidate_email"))
+    )
+    cand_name = (
+        current_user.get("full_name")
+        if current_user and current_user.get("role") == "candidate"
+        else (request.candidate_name or candidate.get("candidate_name"))
+    )
+    interviewer_id = (
+        str(current_user["_id"])
+        if current_user and current_user.get("role") == "interviewer"
+        else None
+    )
 
     state = await interview_service.create_interview(
         candidate_id=request.candidate_id,
         role=request.role,
         candidate_profile=profile,
+        company=request.company,
+        interview_stage=request.interview_stage,
+        interview_nature=request.interview_nature,
         number_of_questions=request.number_of_questions,
+        number_of_followups=request.number_of_followups,
+        job_description=request.job_description,
         interviewer_id=interviewer_id,
         candidate_user_id=cand_user_id,
         candidate_name=cand_name,
@@ -124,9 +184,18 @@ async def create_interview(
     return {
         "interview_id": state.session.interview_id,
         "status": state.status,
+        "company": state.company,
+        "role": state.role,
         "number_of_questions": state.number_of_questions,
+        "interview_profile": (
+            state.interview_profile.model_dump()
+            if state.interview_profile
+            else None
+        ),
         "current_question": (
-            state.current_question.main_question if state.current_question else None
+            state.current_question.model_dump()
+            if state.current_question
+            else None
         ),
     }
 
@@ -136,11 +205,11 @@ async def create_interview(
 async def list_interviews(
     current_user: Optional[dict[str, Any]] = Depends(get_optional_user),
 ):
-    """List interviews scoped to the authenticated user's role."""
+    """List preparation interviews scoped to the authenticated candidate or interviewer."""
     if not current_user:
-        return await interview_service.list_all()
+        return await interview_service.list_all(limit=20)
 
-    role = current_user.get("role")
+    role = current_user.get("role", "candidate")
     user_id = str(current_user["_id"])
 
     if role == "interviewer":
@@ -156,7 +225,11 @@ async def list_interviews(
 async def get_analytics(
     current_user: Optional[dict[str, Any]] = Depends(get_optional_user),
 ):
-    interviewer_id = str(current_user["_id"]) if current_user and current_user.get("role") == "interviewer" else None
+    interviewer_id = (
+        str(current_user["_id"])
+        if current_user and current_user.get("role") == "interviewer"
+        else None
+    )
     return await interview_service.get_analytics(interviewer_id=interviewer_id)
 
 
@@ -165,10 +238,8 @@ async def list_candidates(
     current_user: Optional[dict[str, Any]] = Depends(get_optional_user),
 ):
     if current_user and current_user.get("role") == "candidate":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Candidates cannot access candidate lists.",
-        )
+        user_id = str(current_user["_id"])
+        return await candidate_repository.list_for_user(user_id)
     return await candidate_repository.list_all()
 
 
@@ -184,9 +255,9 @@ async def get_candidate(
             detail="Candidate not found",
         )
 
-    # Object-level check: candidate can only view their own candidate profile
     if current_user and current_user.get("role") == "candidate":
-        if str(candidate.get("user_id") or "") != str(current_user["_id"]):
+        cand_uid = str(candidate.get("user_id") or "")
+        if cand_uid and cand_uid != str(current_user["_id"]):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to candidate profile.",
@@ -303,11 +374,30 @@ async def get_report(
             detail="Report not found or not yet generated",
         )
 
-    # Privacy / Authorization check:
-    # If the requester is a candidate, NEVER expose the recruiter report!
-    if current_user and current_user.get("role") == "candidate":
-        return {
-            "candidate_report": report.candidate_report.model_dump(),
-        }
+    raw_state = raw_doc.get("state", {})
+    profile_data = raw_state.get("interview_profile")
 
-    return report.model_dump()
+    resp = {
+        "interview_id": interview_id,
+        "company": raw_doc.get("company") or (profile_data.get("company") if profile_data else "Target Company"),
+        "role": raw_doc.get("role", ""),
+        "interview_stage": raw_doc.get("interview_stage") or (profile_data.get("interview_stage") if profile_data else "Technical Round 1"),
+        "interview_nature": raw_doc.get("interview_nature") or (profile_data.get("interview_nature") if profile_data else "ML/AI Technical"),
+        "preparation_report": (
+            report.preparation_report.model_dump()
+            if report.preparation_report
+            else None
+        ),
+        "candidate_report": (
+            report.candidate_report.model_dump()
+            if report.candidate_report
+            else None
+        ),
+        "interview_profile": profile_data,
+    }
+
+    if not current_user or current_user.get("role") != "candidate":
+        if report.recruiter_report:
+            resp["recruiter_report"] = report.recruiter_report.model_dump()
+
+    return resp

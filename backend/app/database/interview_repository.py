@@ -6,8 +6,9 @@ from app.models.schemas.interview_state import InterviewState
 
 
 class InterviewRepository:
-    def __init__(self):
-        self.collection = db.interviews
+    @property
+    def collection(self):
+        return db.interviews
 
     async def create(self, state: InterviewState):
         now = datetime.now(timezone.utc)
@@ -18,6 +19,17 @@ class InterviewRepository:
             "candidate_user_id": getattr(state, "candidate_user_id", None),
             "candidate_email": getattr(state, "candidate_email", None),
             "candidate_name": getattr(state, "candidate_name", None),
+            "company": getattr(state, "company", "Target Company"),
+            "interview_stage": (
+                state.interview_profile.interview_stage
+                if state.interview_profile
+                else "Technical Round 1"
+            ),
+            "interview_nature": (
+                state.interview_profile.interview_nature
+                if state.interview_profile
+                else "ML/AI Technical"
+            ),
             "number_of_questions": getattr(state, "number_of_questions", 3),
             "scheduled_at": getattr(state, "scheduled_at", None),
             "role": state.role,
@@ -44,10 +56,13 @@ class InterviewRepository:
             "status": state.status,
             "updated_at": now,
         }
-        # If report exists in state, record summary fields for analytics
-        if state.report and state.report.recruiter_report:
-            update_fields["overall_score"] = state.report.recruiter_report.overall_score
-            update_fields["recommendation"] = state.report.recruiter_report.recommendation
+        if state.report:
+            if state.report.preparation_report:
+                update_fields["overall_score"] = state.report.preparation_report.overall_readiness_score
+                update_fields["readiness_tier"] = state.report.preparation_report.readiness_tier
+            elif state.report.recruiter_report:
+                update_fields["overall_score"] = state.report.recruiter_report.overall_score
+                update_fields["recommendation"] = state.report.recruiter_report.recommendation
 
         await self.collection.update_one(
             {"_id": state.session.interview_id},
@@ -99,55 +114,19 @@ class InterviewRepository:
         if interviewer_id:
             query = {"$or": [{"interviewer_id": interviewer_id}, {"interviewer_id": None}]}
 
-        docs = [doc async for doc in self.collection.find(query)]
+        total = await self.collection.count_documents(query)
+        completed = await self.collection.count_documents({**query, "status": "completed"})
 
-        total_interviews = len(docs)
-        completed_interviews = sum(1 for d in docs if d.get("status") in ("completed", "report_generated"))
-        in_progress_interviews = sum(1 for d in docs if d.get("status") in ("in_progress", "interview_created", "question_presented", "answer_processed", "followup_presented"))
-        scheduled_interviews = sum(1 for d in docs if d.get("status") == "scheduled")
-
-        scores = [
-            d.get("overall_score")
-            for d in docs
-            if d.get("overall_score") is not None
+        avg_pipeline = [
+            {"$match": {**query, "overall_score": {"$exists": True, "$ne": None}}},
+            {"$group": {"_id": None, "avg_score": {"$avg": "$overall_score"}}},
         ]
-        # Also check state if overall_score was not denormalized
-        for d in docs:
-            if d.get("overall_score") is None and "state" in d:
-                report = d.get("state", {}).get("report")
-                if report and "recruiter_report" in report:
-                    score = report["recruiter_report"].get("overall_score")
-                    if score is not None:
-                        scores.append(score)
-
-        avg_score = round(sum(scores) / len(scores), 2) if scores else 0.0
-        completion_rate = round((completed_interviews / total_interviews * 100), 1) if total_interviews else 0.0
-
-        role_counts: dict[str, int] = {}
-        for d in docs:
-            role = d.get("role", "Unknown")
-            role_counts[role] = role_counts.get(role, 0) + 1
-
-        recommendation_counts: dict[str, int] = {}
-        for d in docs:
-            rec = d.get("recommendation")
-            if not rec and "state" in d:
-                rec = (
-                    d.get("state", {})
-                    .get("report", {})
-                    .get("recruiter_report", {})
-                    .get("recommendation")
-                )
-            if rec:
-                recommendation_counts[rec] = recommendation_counts.get(rec, 0) + 1
+        avg_res = await self.collection.aggregate(avg_pipeline).to_list(1)
+        avg_score = round(avg_res[0]["avg_score"], 2) if avg_res else 0.0
 
         return {
-            "total_interviews": total_interviews,
-            "completed_interviews": completed_interviews,
-            "in_progress_interviews": in_progress_interviews,
-            "scheduled_interviews": scheduled_interviews,
+            "total_interviews": total,
+            "completed_interviews": completed,
+            "in_progress": total - completed,
             "average_score": avg_score,
-            "completion_rate": completion_rate,
-            "role_distribution": role_counts,
-            "recommendation_distribution": recommendation_counts,
         }

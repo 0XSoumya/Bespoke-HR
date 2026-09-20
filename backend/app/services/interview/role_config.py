@@ -118,3 +118,46 @@ ROLE_CONFIGS = {
         },
     },
 }
+
+NATURE_CONFIGS = {
+    "Coding": {
+        "priority_topics": {
+            "Data Structures & Algorithms": 10,
+            "Algorithmic Complexity": 9,
+            "Implementation & Edge Cases": 9,
+            "Clean Code & Modularity": 8,
+            "Problem Solving": 8,
+        },
+        "default_style": "hands_on_problem_solving",
+    },
+    "System Design": {
+        "priority_topics": {
+            "Distributed Systems": 10,
+            "Scalability & Caching": 10,
+            "Storage & Data Modeling": 9,
+            "API & Protocol Architecture": 8,
+            "Fault Tolerance & Reliability": 8,
+        },
+        "default_style": "open_ended_architecture_and_tradeoffs",
+    },
+    "Behavioral": {
+        "priority_topics": {
+            "Project Ownership & Initiative": 10,
+            "Technical Conflict & Collaboration": 10,
+            "Navigating Ambiguity": 9,
+            "Failure Recovery & Lessons": 8,
+            "Customer Impact": 8,
+        },
+        "default_style": "star_behavioral_inquiry",
+    },
+    "ML/AI Technical": {
+        "priority_topics": {
+            "RAG Architecture": 10,
+            "Embeddings & Vector Search": 10,
+            "Model Evaluation & Metrics": 9,
+            "LLM Orchestration & Prompting": 8,
+            "Production Inference & Latency": 8,
+        },
+        "default_style": "deep_dive_conceptual_and_architectural",
+    },
+}

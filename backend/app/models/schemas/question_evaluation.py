@@ -1,31 +1,31 @@
 from pydantic import BaseModel, Field
 
 
-class QuestionEvaluation(
-    BaseModel
-):
-    score: float
+class QuestionEvaluation(BaseModel):
+    score: float = 0.0
 
-    conceptual_accuracy: float
+    conceptual_accuracy: float = 0.0
 
-    completeness: float
+    completeness: float = 0.0
 
-    technical_depth: float
+    technical_depth: float = 0.0
 
-    communication: float
+    communication: float = 0.0
 
-    strengths: list[str] = Field(
-        default_factory=list
+    rubric_scores: dict[str, float] = Field(
+        default_factory=dict,
+        description="Stage/nature specific rubric criteria scores (e.g. correctness, scalability, ownership)",
     )
 
-    weaknesses: list[str] = Field(
-        default_factory=list
+    strengths: list[str] = Field(default_factory=list)
+
+    weaknesses: list[str] = Field(default_factory=list)
+
+    missed_concepts: list[str] = Field(default_factory=list)
+
+    evidence: list[str] = Field(
+        default_factory=list,
+        description="Quotes or specific factual evidence from the candidate answer",
     )
 
-    missed_concepts: list[
-        str
-    ] = Field(
-        default_factory=list
-    )
-
-    summary: str
+    summary: str = ""

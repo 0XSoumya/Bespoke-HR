@@ -113,5 +113,6 @@ app.include_router(api_v1)
 
 # Backwards compatibility / legacy routes (unversioned)
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(resume_router)
 app.include_router(interview_router)

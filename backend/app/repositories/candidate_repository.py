@@ -10,8 +10,9 @@ from app.models.schemas.candidate_profile import CandidateProfile
 class CandidateRepository:
     COLLECTION_NAME = "candidates"
 
-    def __init__(self):
-        self.collection = db[self.COLLECTION_NAME]
+    @property
+    def collection(self):
+        return db[self.COLLECTION_NAME]
 
     async def create_candidate(
         self,

@@ -1,110 +1,86 @@
+from typing import Optional
+from app.models.schemas.interview_profile import InterviewProfile
+
+
 def build_evaluation_prompt(
     question_record,
     topic_packet,
-):
-    return f"""
-You are an expert technical interviewer.
+    interview_profile: Optional[InterviewProfile] = None,
+) -> str:
+    company = interview_profile.company if interview_profile else "Target Company"
+    stage = interview_profile.interview_stage if interview_profile else "Technical Round 1"
+    nature = interview_profile.interview_nature if interview_profile else "ML/AI Technical"
+    rubric_items = (
+        "\n- " + "\n- ".join(interview_profile.rubric_criteria)
+        if interview_profile and interview_profile.rubric_criteria
+        else "- Technical correctness\n- Problem-solving structure\n- Communication clarity"
+    )
 
-Your task is to evaluate a candidate's answer.
+    context_json = (
+        topic_packet.model_dump_json(indent=2)
+        if hasattr(topic_packet, "model_dump_json")
+        else str(topic_packet)
+    )
 
-Use a PROFESSIONAL INTERVIEW standard.
+    followups_text = "\n".join(
+        [f"Follow-up: {f.question}\nAnswer: {f.answer}" for f in getattr(question_record, "followups", [])]
+    ) or "None"
 
-Do NOT evaluate like an academic exam.
+    return f"""You are an expert technical interviewer and interview coach evaluating a candidate for:
+Company: {company}
+Interview Stage: {stage}
+Round Nature: {nature}
 
-Reward partial understanding when appropriate.
+STAGE & NATURE RUBRIC CRITERIA:
+{rubric_items}
 
-The purpose of the interview is to assess the
-candidate's demonstrated understanding.
+EVALUATION PRINCIPLES:
+- Professional interview standard (not an academic exam).
+- Evaluate based on the COMPLETE response history (Main answer + Follow-up answers).
+- Credit candidate clarifications and deeper reasoning demonstrated during follow-ups.
+- Identify specific factual quotes or arguments as evidence.
 
-Candidates may improve or clarify their answers
-through follow-up questions.
-
-Information provided in follow-up answers SHOULD
-contribute to the final evaluation.
-
-Evaluate the candidate based on their COMPLETE
-response history, including:
-
-- Main Answer
-- Follow-up Answers
-
-EVALUATION SOURCES
-
-1. Expected Concepts
-2. Evaluation Criteria
-3. Retrieved Context
-4. Candidate Responses
-
-Expected Concepts are the most important source.
-
-QUESTION
-
+QUESTION:
 {question_record.main_question}
 
-EXPECTED CONCEPTS
-
+EXPECTED CONCEPTS:
 {question_record.expected_concepts}
 
-EVALUATION CRITERIA
-
+EVALUATION CRITERIA:
 {question_record.evaluation_criteria}
 
-RETRIEVED CONTEXT
+RETRIEVED TECHNICAL KNOWLEDGE:
+{context_json}
 
-{topic_packet.model_dump_json(indent=2)}
-
-MAIN ANSWER
-
+MAIN CANDIDATE ANSWER:
 {question_record.main_answer}
 
-FOLLOWUPS
+FOLLOW-UP CONVERSATION:
+{followups_text}
 
-{question_record.followups}
-
-SCORING RULES
-
-Use a 0-10 scale.
-
-Score the following dimensions:
-
-- conceptual_accuracy
-- completeness
-- technical_depth
-- communication
-
-SCORING GUIDANCE
-
-- Credit concepts demonstrated in follow-up answers.
-- Do not penalize a candidate for initially
-  missing a concept if they later demonstrate
-  understanding through follow-ups.
-- Reward deeper reasoning shown during followups.
-- Consider the overall quality of the complete
-  conversation.
-
-Overall score should also be on a 0-10 scale.
-
-Return ONLY valid JSON.
-
-Schema:
-
+SCORING (0.0 to 10.0 scale):
+Return ONLY valid JSON matching this schema:
 {{
     "score": 8.5,
-
-    "conceptual_accuracy": 9,
-
-    "completeness": 8,
-
-    "technical_depth": 8,
-
-    "communication": 9,
-
-    "strengths": [],
-
-    "weaknesses": [],
-
+    "conceptual_accuracy": 9.0,
+    "completeness": 8.0,
+    "technical_depth": 8.5,
+    "communication": 9.0,
+    "rubric_scores": {{
+        "Correctness": 9.0,
+        "Depth": 8.5,
+        "Trade-off Analysis": 8.0
+    }},
+    "strengths": [
+        "Identified clear trade-off between latency and accuracy"
+    ],
+    "weaknesses": [
+        "Did not discuss memory bottlenecks under high concurrency"
+    ],
     "missed_concepts": [],
-
-    "summary": "..."
+    "evidence": [
+        "Direct quote or factual reference from candidate answer demonstrating competency"
+    ],
+    "summary": "2-3 sentences summarizing performance on this question."
 }}
 """

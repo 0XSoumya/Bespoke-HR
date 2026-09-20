@@ -77,11 +77,18 @@ def answer_router(
 def followup_decision_node(
     state: InterviewState,
 ):
+    max_f = (
+        state.interview_profile.number_of_followups
+        if getattr(state, "interview_profile", None)
+        else 1
+    )
 
     decision = (
         followup_service
         .generate_followup(
-            state.current_question
+            question_record=state.current_question,
+            max_followups=max_f,
+            interview_profile=getattr(state, "interview_profile", None),
         )
     )
 
@@ -124,12 +131,9 @@ def evaluate_question_node(
     evaluation = (
         evaluation_service
         .evaluate_question(
-            question_record=(
-                state.current_question
-            ),
-            retrieval_context=(
-                state.retrieval_context
-            ),
+            question_record=state.current_question,
+            retrieval_context=state.retrieval_context,
+            interview_profile=getattr(state, "interview_profile", None),
         )
     )
 
@@ -200,8 +204,8 @@ def generate_report_node(
     report = (
         report_service
         .generate_report(
-            state.session
-            .question_records
+            state.session.question_records,
+            interview_profile=getattr(state, "interview_profile", None),
         )
     )
 
@@ -210,7 +214,7 @@ def generate_report_node(
     )
 
     state.status = (
-        "report_generated"
+        "completed"
     )
 
     return state
