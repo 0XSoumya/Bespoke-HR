@@ -71,3 +71,10 @@ class InterviewState(
     status: str = (
         "initialized"
     )
+
+    number_of_questions: int = 3
+    interviewer_id: str | None = None
+    candidate_user_id: str | None = None
+    candidate_email: str | None = None
+    candidate_name: str | None = None
+    scheduled_at: str | None = None

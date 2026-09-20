@@ -44,6 +44,12 @@ class InterviewService:
         candidate_id: str,
         role: str,
         candidate_profile,
+        number_of_questions: int = 3,
+        interviewer_id: str | None = None,
+        candidate_user_id: str | None = None,
+        candidate_name: str | None = None,
+        candidate_email: str | None = None,
+        scheduled_at: str | None = None,
     ) -> InterviewState:
 
         state = (
@@ -56,6 +62,12 @@ class InterviewService:
                 candidate_profile=(
                     candidate_profile
                 ),
+                number_of_questions=number_of_questions,
+                interviewer_id=interviewer_id,
+                candidate_user_id=candidate_user_id,
+                candidate_name=candidate_name,
+                candidate_email=candidate_email,
+                scheduled_at=scheduled_at,
             )
         )
 
@@ -213,3 +225,29 @@ class InterviewService:
             return None
 
         return state.report
+
+    async def get_raw_interview(self, interview_id: str):
+        return await self.persistence.get_raw_document(interview_id)
+
+    async def list_for_interviewer(self, interviewer_id: str, limit: int = 100):
+        return await self.persistence.list_for_interviewer(interviewer_id, limit=limit)
+
+    async def list_for_candidate(
+        self,
+        candidate_user_id: str | None = None,
+        candidate_email: str | None = None,
+        candidate_id: str | None = None,
+        limit: int = 100,
+    ):
+        return await self.persistence.list_for_candidate(
+            candidate_user_id=candidate_user_id,
+            candidate_email=candidate_email,
+            candidate_id=candidate_id,
+            limit=limit,
+        )
+
+    async def list_all(self, limit: int = 100):
+        return await self.persistence.list_all(limit=limit)
+
+    async def get_analytics(self, interviewer_id: str | None = None):
+        return await self.persistence.get_analytics(interviewer_id=interviewer_id)

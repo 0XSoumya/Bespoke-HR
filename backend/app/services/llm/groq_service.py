@@ -12,9 +12,10 @@ class GroqService:
     def invoke(
         self,
         prompt: str,
-        model: str = "llama-3.3-70b-versatile",
-        
+        model: str = None,
     ) -> str:
+        if model is None:
+            model = settings.GROQ_MODEL
 
         response = self.client.chat.completions.create(
             model=model,

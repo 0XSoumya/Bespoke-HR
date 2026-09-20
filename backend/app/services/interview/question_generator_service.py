@@ -51,6 +51,7 @@ class QuestionGeneratorService:
     def generate_questions(
         self,
         retrieval_context,
+        num_questions: int | None = None,
     ) -> QuestionSet:
 
         questions = []
@@ -60,6 +61,8 @@ class QuestionGeneratorService:
         for topic_packet in (
             retrieval_context.topic_packets
         ):
+            if num_questions and len(questions) >= num_questions:
+                break
 
             prompt = (
                 build_topic_question_prompt(
@@ -91,6 +94,8 @@ class QuestionGeneratorService:
             for item in parsed[
                 "questions"
             ]:
+                if num_questions and len(questions) >= num_questions:
+                    break
 
                 questions.append(
                     InterviewQuestion(
@@ -122,6 +127,9 @@ class QuestionGeneratorService:
                 )
 
                 question_counter += 1
+
+        if num_questions and len(questions) > num_questions:
+            questions = questions[:num_questions]
 
         return QuestionSet(
             role=(

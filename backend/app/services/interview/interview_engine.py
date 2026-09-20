@@ -52,6 +52,12 @@ class InterviewEngine:
         candidate_id: str,
         role: str,
         candidate_profile,
+        number_of_questions: int = 3,
+        interviewer_id: str | None = None,
+        candidate_user_id: str | None = None,
+        candidate_name: str | None = None,
+        candidate_email: str | None = None,
+        scheduled_at: str | None = None,
     ) -> InterviewState:
 
         interview_plan = (
@@ -61,6 +67,7 @@ class InterviewEngine:
                 candidate_profile=(
                     candidate_profile
                 ),
+                num_questions=number_of_questions,
             )
         )
 
@@ -84,7 +91,8 @@ class InterviewEngine:
         question_set = (
             self.question_generator
             .generate_questions(
-                retrieval_context
+                retrieval_context,
+                num_questions=number_of_questions,
             )
         )
 
@@ -113,4 +121,10 @@ class InterviewEngine:
             status=(
                 "interview_created"
             ),
+            number_of_questions=number_of_questions,
+            interviewer_id=interviewer_id,
+            candidate_user_id=candidate_user_id,
+            candidate_name=candidate_name,
+            candidate_email=candidate_email,
+            scheduled_at=scheduled_at,
         )

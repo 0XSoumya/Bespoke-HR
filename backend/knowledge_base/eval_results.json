@@ -1,0 +1,389 @@
+{
+  "search_mode": "hybrid",
+  "num_test_queries": 12,
+  "k_values": [
+    3,
+    5,
+    10
+  ],
+  "summary_metrics": {
+    "k=3": {
+      "recall": 0.0542,
+      "precision": 0.2222,
+      "hit_rate": 0.6667,
+      "mrr": 0.3333,
+      "ndcg": 0.1974
+    },
+    "k=5": {
+      "recall": 0.0917,
+      "precision": 0.2167,
+      "hit_rate": 0.75,
+      "mrr": 0.3542,
+      "ndcg": 0.2035
+    },
+    "k=10": {
+      "recall": 0.1681,
+      "precision": 0.2083,
+      "hit_rate": 0.75,
+      "mrr": 0.3542,
+      "ndcg": 0.2116
+    }
+  },
+  "latency": {
+    "mean_ms": 352.69,
+    "median_ms": 335.83,
+    "p95_ms": 447.68,
+    "min_ms": 313.06,
+    "max_ms": 572.74
+  },
+  "queries": [
+    {
+      "query": "retrieval augmented generation chunking and embeddings",
+      "domain": "GenAI/RAG",
+      "relevant_count": 15,
+      "latency_ms": 572.74,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0667,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.0667,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.214
+        },
+        "k=10": {
+          "recall": 0.1333,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2083
+        }
+      }
+    },
+    {
+      "query": "prompt engineering system instructions few shot",
+      "domain": "GenAI",
+      "relevant_count": 15,
+      "latency_ms": 334.34,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "k=5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "k=10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "query": "transformer self attention mechanism query key value",
+      "domain": "AI/ML",
+      "relevant_count": 15,
+      "latency_ms": 338.32,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0667,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.1333,
+          "precision": 0.4,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.3601
+        },
+        "k=10": {
+          "recall": 0.2667,
+          "precision": 0.4,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.3757
+        }
+      }
+    },
+    {
+      "query": "gradient descent learning rate optimization backpropagation",
+      "domain": "Machine Learning",
+      "relevant_count": 15,
+      "latency_ms": 332.85,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0667,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.0667,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.214
+        },
+        "k=10": {
+          "recall": 0.1333,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2083
+        }
+      }
+    },
+    {
+      "query": "machine learning model evaluation precision recall f1 score",
+      "domain": "Machine Learning",
+      "relevant_count": 15,
+      "latency_ms": 345.36,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0667,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.1333,
+          "precision": 0.4,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.3601
+        },
+        "k=10": {
+          "recall": 0.2667,
+          "precision": 0.4,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.3815
+        }
+      }
+    },
+    {
+      "query": "linear regression model coefficients least squares",
+      "domain": "Data Science",
+      "relevant_count": 15,
+      "latency_ms": 338.07,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0667,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.0667,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.214
+        },
+        "k=10": {
+          "recall": 0.1333,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2083
+        }
+      }
+    },
+    {
+      "query": "k-means clustering centroid distance algorithm",
+      "domain": "Data Science",
+      "relevant_count": 15,
+      "latency_ms": 341.62,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "k=5": {
+          "recall": 0.0667,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.25,
+          "ndcg": 0.1461
+        },
+        "k=10": {
+          "recall": 0.2,
+          "precision": 0.3,
+          "hit_rate": 1.0,
+          "mrr": 0.25,
+          "ndcg": 0.2278
+        }
+      }
+    },
+    {
+      "query": "docker container isolation image layer dockerfile",
+      "domain": "DevOps",
+      "relevant_count": 15,
+      "latency_ms": 329.85,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "k=5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "k=10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "query": "kubernetes pod scheduling deployment cluster",
+      "domain": "DevOps",
+      "relevant_count": 12,
+      "latency_ms": 337.32,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0833,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.1667,
+          "precision": 0.4,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.3601
+        },
+        "k=10": {
+          "recall": 0.25,
+          "precision": 0.3,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2973
+        }
+      }
+    },
+    {
+      "query": "continuous integration continuous delivery ci cd pipeline",
+      "domain": "DevOps",
+      "relevant_count": 15,
+      "latency_ms": 330.38,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "k=5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "k=10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "hit_rate": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "query": "mlops model monitoring drift pipeline deployment",
+      "domain": "MLOps",
+      "relevant_count": 15,
+      "latency_ms": 318.34,
+      "metrics": {
+        "k=3": {
+          "recall": 0.0667,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.0667,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.214
+        },
+        "k=10": {
+          "recall": 0.1333,
+          "precision": 0.2,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2025
+        }
+      }
+    },
+    {
+      "query": "vector database similarity search faiss index",
+      "domain": "GenAI/RAG",
+      "relevant_count": 6,
+      "latency_ms": 313.06,
+      "metrics": {
+        "k=3": {
+          "recall": 0.1667,
+          "precision": 0.3333,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.2961
+        },
+        "k=5": {
+          "recall": 0.3333,
+          "precision": 0.4,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.3601
+        },
+        "k=10": {
+          "recall": 0.5,
+          "precision": 0.3,
+          "hit_rate": 1.0,
+          "mrr": 0.5,
+          "ndcg": 0.429
+        }
+      }
+    }
+  ]
+}

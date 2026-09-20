@@ -21,7 +21,7 @@ class VoyageEmbeddingService:
         )
 
         self.model = (
-            "voyage-3"
+            getattr(settings, "VOYAGE_MODEL", "voyage-3.5")
         )
 
     def embed_texts(

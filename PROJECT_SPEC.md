@@ -1,4 +1,6 @@
-# Adaptive AI Interview System — Project Specification
+# Adaptive AI Interview System — Legacy / Superseded Product Specification
+
+This file is retained as historical context only. The current authoritative product direction is defined in `docs/TARGET_PRODUCT_SPEC.md`.
 
 ## 1. Product
 
@@ -475,9 +477,9 @@ Phase 1 is complete when:
 - security issues found during the audit are addressed
 - coherent Git commits exist
 
-## 20. Phase 2
+## 20 Deferred Work
 
-Potential Phase 2 work:
+The following are intentionally out of scope for the current implementation:
 
 - curated external imagery
 - retrieval reranking experiments
@@ -488,4 +490,6 @@ Potential Phase 2 work:
 - deployment refinements
 - additional product features
 
-Phase 2 must not be used as an excuse to leave Phase 1 functionality incomplete.
+Do not implement these unless they are required by an existing Phase 1 requirement.
+
+The current objective is to make Phase 1 complete, robust, polished, and demonstrable.

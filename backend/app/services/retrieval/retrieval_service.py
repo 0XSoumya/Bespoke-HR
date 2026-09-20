@@ -4,6 +4,7 @@ import faiss
 import numpy as np
 from rank_bm25 import BM25Okapi
 
+from app.core.config.settings import settings
 from app.services.retrieval.voyage_embedding_service import (
     VoyageEmbeddingService,
 )
@@ -11,10 +12,13 @@ from app.services.retrieval.voyage_embedding_service import (
 class RetrievalService:
     def __init__(
         self,
-        faiss_path="knowledge_base/faiss.index",
-        chunks_path="knowledge_base/chunks.json",
-        metadata_path="knowledge_base/metadata.json",
+        faiss_path=None,
+        chunks_path=None,
+        metadata_path=None,
     ):
+        faiss_path = faiss_path or settings.FAISS_PATH
+        chunks_path = chunks_path or settings.CHUNKS_PATH
+        metadata_path = metadata_path or settings.METADATA_PATH
         self.index = faiss.read_index(faiss_path)
 
         with open(chunks_path, "r", encoding="utf-8") as f:

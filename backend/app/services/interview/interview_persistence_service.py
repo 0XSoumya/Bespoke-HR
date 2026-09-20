@@ -90,3 +90,29 @@ class InterviewPersistenceService:
                 interview_id
             )
         )
+
+    async def list_for_interviewer(self, interviewer_id: str, limit: int = 100):
+        return await self.interview_repository.list_for_interviewer(interviewer_id, limit=limit)
+
+    async def list_for_candidate(
+        self,
+        candidate_user_id: str | None = None,
+        candidate_email: str | None = None,
+        candidate_id: str | None = None,
+        limit: int = 100,
+    ):
+        return await self.interview_repository.list_for_candidate(
+            candidate_user_id=candidate_user_id,
+            candidate_email=candidate_email,
+            candidate_id=candidate_id,
+            limit=limit,
+        )
+
+    async def list_all(self, limit: int = 100):
+        return await self.interview_repository.list_all(limit=limit)
+
+    async def get_raw_document(self, interview_id: str):
+        return await self.interview_repository.get_raw_document(interview_id)
+
+    async def get_analytics(self, interviewer_id: str | None = None):
+        return await self.interview_repository.get_analytics(interviewer_id=interviewer_id)

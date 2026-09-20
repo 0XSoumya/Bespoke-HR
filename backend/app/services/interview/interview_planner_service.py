@@ -13,9 +13,19 @@ class InterviewPlannerService:
         self,
         target_role: str,
         candidate_profile,
+        num_questions: int = 3,
     ) -> InterviewPlan:
 
-        role_config = ROLE_CONFIGS[target_role]
+        matched_role = None
+        for role_key in ROLE_CONFIGS:
+            if role_key.lower() == target_role.lower():
+                matched_role = role_key
+                break
+
+        if matched_role is None:
+            matched_role = "AI/ML Engineer"
+
+        role_config = ROLE_CONFIGS[matched_role]
 
         priority_topics = (
             role_config["priority_topics"]
@@ -69,7 +79,10 @@ class InterviewPlannerService:
             reverse=True,
         )
 
+        if num_questions and num_questions > 0:
+            topics = topics[:num_questions]
+
         return InterviewPlan(
-            role=target_role,
+            role=matched_role,
             topics=topics,
         )

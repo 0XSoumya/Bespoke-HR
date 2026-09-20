@@ -31,6 +31,19 @@ The repository is the source of truth for existing behavior.
 
 PROJECT_SPEC.md defines product and engineering requirements.
 
+## Current product baseline
+
+- Current product specification: `docs/TARGET_PRODUCT_SPEC.md`
+- Current architecture direction: `docs/ARCHITECTURE_DIRECTION.md`
+- Current project state: `docs/PROJECT_STATE.md`
+- Roadmap: `docs/ROADMAP.md`
+- Decisions log: `docs/DECISIONS.md`
+- Graphify may be used for repository navigation when helpful, but generated graph output is not the final product source of truth.
+- Implementation should proceed in small vertical slices with validation after each slice.
+- Agents must not blindly rewrite existing working backend functionality.
+- Recruiter-specific legacy code should only be removed when the current task explicitly calls for it.
+- Interrupted or rate-limited agents should leave the repository in a state another agent can understand and continue from.
+
 ## Decision Priority
 
 When requirements conflict, use this order:
